@@ -1,25 +1,120 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
 
-function App() {
+const FileCheckbox = ({ file, onFileChange }) => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <input
+        type="checkbox"
+        checked={file.selected}
+        onChange={() => onFileChange(file)}
+      />
+      {file.name}
     </div>
   );
-}
+};
+
+const FolderCheckbox = ({ folder, onFolderChange, onFolderFileChange }) => {
+  return (
+    <div>
+      <input
+        type="checkbox"
+        checked={folder.selected}
+        onChange={() => onFolderChange(folder)}
+      />
+      {folder.name}
+      {folder.files.map((file) => (
+        <FileCheckbox
+          key={file.id}
+          file={file}
+          onFileChange={(selectedFile) =>
+            onFolderFileChange(folder, selectedFile)
+          }
+        />
+      ))}
+    </div>
+  );
+};
+
+const App = () => {
+  const [folders, setFolders] = useState([
+    {
+      id: 1,
+      name: 'components',
+      selected: false,
+      files: [
+        { id: 11, name: 'Header.js', selected: false },
+        { id: 12, name: 'Footer.js', selected: false },
+        { id: 13, name: 'Navbar.js', selected: false },],
+    },
+    {
+      id: 2,
+      name: 'pages',
+      selected: false,
+      files: [
+        { id: 21, name: 'Home.js', selected: false },
+        { id: 22, name: 'About.js', selected: false },
+      ],
+    },
+    {
+      id: 3,
+      name: 'routes',
+      selected: false,
+      files: [
+        { id: 31, name: 'Routes.js', selected: false }
+      ],
+    },
+  ]);
+
+  const handleFolderChange = (selectedFolder) => {
+    const updatedFolders = folders.map((folder) =>
+      folder.id === selectedFolder.id
+        ? {
+            ...folder,
+            selected: !folder.selected,
+            files: folder.files.map((file) => ({
+              ...file,
+              selected: !folder.selected,
+            })),
+          }
+        : folder
+    );
+    setFolders(updatedFolders);
+  };
+
+  const handleFolderFileChange = (folder, selectedFile) => {
+    const updatedFolders = folders.map((f) => {
+      if (f.id === folder.id) {
+        const updatedFiles = f.files.map((file) =>
+          file.id === selectedFile.id
+            ? { ...file, selected: !file.selected }
+            : file
+        );
+  
+        return {
+          ...f,
+          files: updatedFiles,
+          selected: updatedFiles.every((file) => file.selected),
+        };
+      }
+      return f;
+    });
+  
+    setFolders(updatedFolders);
+  };
+
+  return (
+    <div>
+      {folders.map((folder) => (
+        <FolderCheckbox
+          key={folder.id}
+          folder={folder}
+          onFolderChange={handleFolderChange}
+          onFolderFileChange={handleFolderFileChange}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default App;
