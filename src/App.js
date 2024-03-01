@@ -14,24 +14,36 @@ const FileCheckbox = ({ file, onFileChange }) => {
   );
 };
 
+
 const FolderCheckbox = ({ folder, onFolderChange, onFolderFileChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleToggle = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <div>
+    <div className={`folder ${isOpen ? 'open' : ''}`}>
       <input
         type="checkbox"
         checked={folder.selected}
-        onChange={() => onFolderChange(folder)}
+        onChange={() => {
+          onFolderChange(folder);
+          handleToggle();
+        }}
       />
-      {folder.name}
-      {folder.files.map((file) => (
-        <FileCheckbox
-          key={file.id}
-          file={file}
-          onFileChange={(selectedFile) =>
-            onFolderFileChange(folder, selectedFile)
-          }
-        />
-      ))}
+      <span onClick={handleToggle}>{folder.name}</span>
+      <div>
+        {folder.files.map((file) => (
+          <FileCheckbox
+            key={file.id}
+            file={file}
+            onFileChange={(selectedFile) =>
+              onFolderFileChange(folder, selectedFile)
+            }
+          />
+        ))}
+      </div>
     </div>
   );
 };
